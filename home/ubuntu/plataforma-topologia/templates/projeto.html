@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="text-center bg-black p-3 rounded-4 border border-secondary mb-4">
-                    <img src="{{ url_for('static', filename='imagens/' + cliente.imagem_render) }}" alt="{{ cliente.Topologia }}" class="topologia-img shadow-lg mb-0" onerror="this.src='https://via.placeholder.com/800x450/121212/82bc00?text=Imagem+Nao+Encontrada'">
+                    <img src="{{ url_for('static', filename='imagens/' ~ cliente.imagem_render) }}" alt="{{ cliente.Topologia }}" class="topologia-img shadow-lg mb-0" onerror="this.src='https://via.placeholder.com/800x450/121212/82bc00?text=Imagem+Nao+Encontrada'">
                 </div>
             </div>
 
