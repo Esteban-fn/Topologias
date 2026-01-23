@@ -41,29 +41,29 @@
                     </h4>
                     
                     <div class="mb-3">
-                        <label class="text-muted small d-block">Status de Andamento</label>
+                        <label class="text-muted small d-block">Status de Andamento:</label>
                         <span class="badge {% if cliente.Andamento == 'Finalizada' %}bg-success{% elif cliente.Andamento == 'Não iniciada' %}bg-secondary{% else %}bg-warning text-dark{% endif %} fs-6">
                             {{ cliente.Andamento }}
                         </span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="text-muted small d-block">Contrato</label>
+                        <label class="text-muted small d-block">Contrato:</label>
                         <span class="text-white fw-bold">{{ cliente.Contrato }}</span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="text-muted small d-block">Endereço</label>
+                        <label class="text-muted small d-block">Endereço:</label>
                         <span class="text-white small">{{ cliente.Endereço }}</span>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="text-muted small d-block">Data</label>
+                            <label class="text-muted small d-block">Data:</label>
                             <span class="text-white">{{ cliente.Data }}</span>
                         </div>
                         <div class="col-6">
-                            <label class="text-muted small d-block">Criada Por</label>
+                            <label class="text-muted small d-block">Criada Por:</label>
                             <span class="text-white">{{ cliente['Criada Por'] }}</span>
                         </div>
                     </div>
