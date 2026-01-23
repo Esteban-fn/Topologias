@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ cliente.nome_cliente }} - Solução Network</title>
+    <title>{{ cliente.Cliente }} - Solução Network</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -12,7 +13,6 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('dashboard') }}">
                 <img src="{{ url_for('static', filename='imagens/logo.png') }}" alt="Solução Network" onerror="this.style.display='none'">
-                <!-- Texto removido -->
             </a>
             <div class="ms-auto">
                 <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm me-2">Voltar</a>
@@ -22,27 +22,54 @@
     </nav>
 
     <div class="container mt-5 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
+        <div class="row">
+            <div class="col-lg-8">
                 <div class="mb-4">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}" class="text-muted text-decoration-none">Dashboard</a></li>
-                            <li class="breadcrumb-item active text-white" aria-current="page">{{ cliente.nome_cliente }}</li>
-                        </ol>
-                    </nav>
-                    <h1 class="display-6 fw-bold" style="color: var(--primary-green);">{{ cliente.titulo_sistema }}</h1>
-                    <p class="lead text-muted">{{ cliente.nome_cliente }}</p>
+                    <h1 class="display-6 fw-bold text-white">{{ cliente.Topologia }}</h1>
+                    <p class="lead" style="color: var(--primary-green);">{{ cliente.Cliente }}</p>
                 </div>
 
                 <div class="text-center bg-black p-3 rounded-4 border border-secondary mb-4">
-                    <img src="{{ url_for('static', filename='imagens/' + cliente.imagem) }}" alt="Topologia {{ cliente.nome_cliente }}" class="topologia-img shadow-lg mb-0">
+                    <img src="{{ url_for('static', filename='imagens/' + cliente.imagem_render) }}" alt="{{ cliente.Topologia }}" class="topologia-img shadow-lg mb-0" onerror="this.src='https://via.placeholder.com/800x450/121212/82bc00?text=Imagem+Nao+Encontrada'">
                 </div>
-                
-                <div class="resumo-box mt-4">
-                    <h4 class="mb-3" style="color: var(--primary-green);">Resumo Técnico</h4>
-                    <div class="text-white" style="line-height: 1.8; font-size: 1.1rem;">
-                        {{ cliente.resumo }}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="resumo-box h-100">
+                    <h4 class="mb-4" style="color: var(--primary-green); border-bottom: 1px solid #333; padding-bottom: 10px;">
+                        <i class="bi bi-info-circle me-2"></i>Detalhes Técnicos
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Status de Andamento</label>
+                        <span class="badge {% if cliente.Andamento == 'Finalizada' %}bg-success{% elif cliente.Andamento == 'Não iniciada' %}bg-secondary{% else %}bg-warning text-dark{% endif %} fs-6">
+                            {{ cliente.Andamento }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Contrato</label>
+                        <span class="text-white fw-bold">{{ cliente.Contrato }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Endereço</label>
+                        <span class="text-white small">{{ cliente.Endereço }}</span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="text-muted small d-block">Data</label>
+                            <span class="text-white">{{ cliente.Data }}</span>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small d-block">Criada Por</label>
+                            <span class="text-white">{{ cliente['Criada Por'] }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-secondary">
+                        <p class="text-muted small"><i class="bi bi-shield-check me-1"></i> Informações verificadas pelo suporte técnico Solução Network.</p>
                     </div>
                 </div>
             </div>

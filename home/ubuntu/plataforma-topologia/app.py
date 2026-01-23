@@ -10,7 +10,7 @@ app.secret_key = 'chave_secreta_para_sessao'
 USUARIO_ADMIN = 'suporte'
 SENHA_ADMIN = 'senha123'
 
-# Caminhos baseados no diretório do arquivo para evitar erros em diferentes sistemas
+# Caminhos
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 EXCEL_PATH = os.path.join(BASE_DIR, 'data', 'clientes.xlsx')
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'imagens')
@@ -23,8 +23,14 @@ def allowed_file(filename):
 
 def carregar_dados():
     if os.path.exists(EXCEL_PATH):
-        return pd.read_excel(EXCEL_PATH)
-    return pd.DataFrame(columns=['id', 'nome_cliente', 'titulo_sistema', 'imagem', 'resumo'])
+        df = pd.read_excel(EXCEL_PATH)
+        # Garante que as colunas existam
+        colunas_esperadas = ['Cliente', 'Contrato', 'Topologia', 'Endereço', 'Data', 'Criada Por', 'Andamento']
+        for col in colunas_esperadas:
+            if col not in df.columns:
+                df[col] = ""
+        return df
+    return pd.DataFrame(columns=['Cliente', 'Contrato', 'Topologia', 'Endereço', 'Data', 'Criada Por', 'Andamento'])
 
 def salvar_dados(df):
     df.to_excel(EXCEL_PATH, index=False)
@@ -57,6 +63,8 @@ def dashboard():
     if 'logado' not in session:
         return redirect(url_for('login'))
     df = carregar_dados()
+    # Adiciona um ID temporário para as rotas baseado no index se não houver ID real
+    df['id_temp'] = df.index
     clientes = df.to_dict('records')
     return render_template('dashboard.html', clientes=clientes)
 
@@ -65,79 +73,56 @@ def projeto(id):
     if 'logado' not in session:
         return redirect(url_for('login'))
     df = carregar_dados()
-    cliente = df[df['id'] == id].to_dict('records')
-    if not cliente:
+    if id >= len(df):
         flash('Projeto não encontrado!', 'warning')
         return redirect(url_for('dashboard'))
-    return render_template('projeto.html', cliente=cliente[0])
+    
+    cliente = df.iloc[id].to_dict()
+    # Lógica para encontrar a imagem: usa o nome da coluna Topologia + .png se não tiver extensão
+    img_name = str(cliente['Topologia'])
+    if img_name and not any(img_name.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg']):
+        img_name += ".png"
+    cliente['imagem_render'] = img_name
+    
+    return render_template('projeto.html', cliente=cliente)
 
 @app.route('/adicionar', methods=['POST'])
 def adicionar():
     if 'logado' not in session:
         return redirect(url_for('login'))
     
-    nome = request.form.get('nome_cliente')
-    titulo = request.form.get('titulo_sistema')
-    resumo = request.form.get('resumo')
-    file = request.files.get('imagem')
+    nova_linha = {
+        'Cliente': request.form.get('Cliente'),
+        'Contrato': request.form.get('Contrato'),
+        'Topologia': request.form.get('Topologia'),
+        'Endereço': request.form.get('Endereço'),
+        'Data': request.form.get('Data'),
+        'Criada Por': request.form.get('Criada Por'),
+        'Andamento': request.form.get('Andamento')
+    }
     
-    filename = 'default.png'
+    file = request.files.get('imagem')
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # Se enviou imagem, podemos salvar o nome dela na coluna Topologia ou manter o nome do campo
     
     df = carregar_dados()
-    novo_id = int(df['id'].max() + 1) if not df.empty else 1
-    
-    nova_linha = {
-        'id': novo_id,
-        'nome_cliente': nome,
-        'titulo_sistema': titulo,
-        'imagem': filename,
-        'resumo': resumo
-    }
-    
     df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
     salvar_dados(df)
     flash('Cliente adicionado com sucesso!', 'success')
-    return redirect(url_for('dashboard'))
-
-@app.route('/editar/<int:id>', methods=['POST'])
-def editar(id):
-    if 'logado' not in session:
-        return redirect(url_for('login'))
-    
-    df = carregar_dados()
-    idx = df[df['id'] == id].index
-    
-    if not idx.empty:
-        df.at[idx[0], 'nome_cliente'] = request.form.get('nome_cliente')
-        df.at[idx[0], 'titulo_sistema'] = request.form.get('titulo_sistema')
-        df.at[idx[0], 'resumo'] = request.form.get('resumo')
-        
-        file = request.files.get('imagem')
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            df.at[idx[0], 'imagem'] = filename
-            
-        salvar_dados(df)
-        flash('Projeto atualizado com sucesso!', 'success')
-    
     return redirect(url_for('dashboard'))
 
 @app.route('/excluir/<int:id>')
 def excluir(id):
     if 'logado' not in session:
         return redirect(url_for('login'))
-    
     df = carregar_dados()
-    df = df[df['id'] != id]
+    df = df.drop(df.index[id])
     salvar_dados(df)
     flash('Projeto excluído com sucesso!', 'success')
     return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
-    # Porta dinâmica para compatibilidade com serviços de nuvem
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)

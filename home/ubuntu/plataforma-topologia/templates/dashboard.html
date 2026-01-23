@@ -13,7 +13,6 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('dashboard') }}">
                 <img src="{{ url_for('static', filename='imagens/logo.png') }}" alt="Solução Network" onerror="this.style.display='none'">
-                <!-- Texto removido -->
             </a>
             <div class="ms-auto">
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Sair</a>
@@ -34,71 +33,36 @@
         {% endwith %}
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Dashboard de Topologias</h2>
+            <h2 class="mb-0">Topologias de Clientes</h2>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionar">
-                <i class="bi bi-plus-circle me-2"></i>Adicionar Topologia
+                <i class="bi bi-plus-circle me-2"></i>Nova Topologia
             </button>
         </div>
         
         <div class="row">
             {% for cliente in clientes %}
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm border-0">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">{{ cliente.nome_cliente }}</h5>
+                            <span class="badge {% if cliente.Andamento == 'Finalizada' %}bg-success{% elif cliente.Andamento == 'Não iniciada' %}bg-secondary{% else %}bg-warning text-dark{% endif %} mb-2">
+                                {{ cliente.Andamento }}
+                            </span>
                             <div class="dropdown">
                                 <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEditar{{ cliente.id }}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="{{ url_for('excluir', id=cliente.id) }}" onclick="return confirm('Tem certeza que deseja excluir esta topologia?')"><i class="bi bi-trash me-2"></i>Excluir</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{{ url_for('excluir', id=cliente.id_temp) }}" onclick="return confirm('Excluir esta topologia?')"><i class="bi bi-trash me-2"></i>Excluir</a></li>
                                 </ul>
                             </div>
                         </div>
-                        <p class="card-text text-muted small mb-4">{{ cliente.titulo_sistema }}</p>
+                        <h5 class="card-title mb-1 text-white">{{ cliente.Cliente }}</h5>
+                        <p class="text-muted small mb-3"><i class="bi bi-hash me-1"></i>Contrato: {{ cliente.Contrato }}</p>
+                        
                         <div class="mt-auto">
-                            <a href="{{ url_for('projeto', id=cliente.id) }}" class="btn btn-primary btn-sm w-100">VER TOPOLOGIA</a>
+                            <a href="{{ url_for('projeto', id=cliente.id_temp) }}" class="btn btn-primary btn-sm w-100">ABRIR TOPOLOGIA</a>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Editar -->
-            <div class="modal fade" id="modalEditar{{ cliente.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content bg-dark text-white border-secondary">
-                        <div class="modal-header border-secondary">
-                            <h5 class="modal-title">Editar Topologia: {{ cliente.nome_cliente }}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form action="{{ url_for('editar', id=cliente.id) }}" method="POST" enctype="multipart/form-data">
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Nome do Cliente</label>
-                                    <input type="text" class="form-control" name="nome_cliente" value="{{ cliente.nome_cliente }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Título do Sistema</label>
-                                    <input type="text" class="form-control" name="titulo_sistema" value="{{ cliente.titulo_sistema }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Resumo Técnico</label>
-                                    <textarea class="form-control" name="resumo" rows="4" required>{{ cliente.resumo }}</textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Alterar Imagem (Opcional)</label>
-                                    <input type="file" class="form-control" name="imagem">
-                                    <small class="text-muted">Atual: {{ cliente.imagem }}</small>
-                                </div>
-                            </div>
-                            <div class="modal-footer border-secondary">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -111,40 +75,62 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content bg-dark text-white border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title">Nova Topologia</h5>
+                    <h5 class="modal-title">Cadastrar Nova Topologia</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ url_for('adicionar') }}" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Nome do Cliente</label>
-                            <input type="text" class="form-control" name="nome_cliente" placeholder="Ex: Edifício Meridian" required>
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Cliente</label>
+                                <input type="text" class="form-control" name="Cliente" placeholder="Nome Completo / ID" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Contrato</label>
+                                <input type="text" class="form-control" name="Contrato" required>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Título do Sistema</label>
-                            <input type="text" class="form-control" name="titulo_sistema" placeholder="Ex: Sistema de CFTV e Rede" required>
+                            <label class="form-label">Endereço</label>
+                            <input type="text" class="form-control" name="Endereço" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome da Topologia (Arquivo)</label>
+                                <input type="text" class="form-control" name="Topologia" placeholder="Ex: Topologia Marly" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Andamento</label>
+                                <select class="form-select bg-dark text-white border-secondary" name="Andamento">
+                                    <option value="Não iniciada">Não iniciada</option>
+                                    <option value="Em andamento">Em andamento</option>
+                                    <option value="Finalizada">Finalizada</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data</label>
+                                <input type="text" class="form-control" name="Data" placeholder="DD/MM/AAAA">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Criada Por</label>
+                                <input type="text" class="form-control" name="Criada Por">
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Resumo Técnico</label>
-                            <textarea class="form-control" name="resumo" rows="4" placeholder="Descreva os equipamentos e a situação técnica..." required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Imagem da Topologia</label>
-                            <input type="file" class="form-control" name="imagem" required>
+                            <label class="form-label">Upload da Imagem</label>
+                            <input type="file" class="form-control" name="imagem">
                         </div>
                     </div>
                     <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <footer class="mt-5 py-4 text-center text-muted border-top border-secondary">
-        <small>&copy; 2026 Solução Network - Gestão de Esteban</small>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
